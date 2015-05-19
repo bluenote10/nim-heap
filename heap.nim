@@ -10,7 +10,7 @@ type
   # defining this causes strange Nim bugs
   # CompareProc[T] = proc (x: T, y: T): int 
 
-  Heap[T] = object
+  Heap*[T] = object
     data: seq[T]
     size: int
     cmp: proc (x: T, y: T): int # CompareProc[T], why int not byte?
