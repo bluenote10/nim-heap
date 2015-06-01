@@ -1,9 +1,9 @@
 [Package]
-name          = "nim-heap"
+name          = "binaryheap"
 version       = "0.1.0"
 author        = "Fabian Keller"
 description   = "Simple binary heap implementation"
 license       = "MIT"
 
 [Deps]
-Requires: "nim >= 0.10.0"
+Requires: "nim >= 0.11.0"
