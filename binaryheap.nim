@@ -23,10 +23,6 @@ proc size*[T](h: Heap[T]): int {.inline.} = h.size
   ## returns the size of a heap.
 
 
-proc hasIndex[T](h: Heap[T], i: int): bool {.inline.} =
-  ## checks if i a valid index.
-  0 <= i and i < h.size
-
 proc hasChildAt[T](h: Heap[T], i: int): bool {.inline.} =
   ## similar to hasIndex but if we already have the parent it suffices to check.
   i < h.size
