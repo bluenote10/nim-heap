@@ -1,4 +1,4 @@
-
+import strutils
 
 # helper functions to calculate parent/child relationships
 proc parentInd(i: int): int {.inline.} = (i-1) div 2
@@ -8,7 +8,7 @@ proc childRInd(i: int): int {.inline.} = 2*i + 2
 
 type
   # defining this causes strange Nim bugs
-  # CompareProc[T] = proc (x: T, y: T): int 
+  # CompareProc[T] = proc (x: T, y: T): int
 
   Heap*[T] = object
     data: seq[T]
@@ -45,6 +45,27 @@ proc propFulfilled[T](h: Heap[T], indParent, indChild: int): bool {.inline.} =
   h.comp(h.data[indParent], h.data[indChild]) <= 0
 
 
+template assertHeapProperty[T](h: Heap[T], enabled: expr = true) =
+  ## only for debugging: explicit check if the heap property
+  ## is fulfilled for all nodes
+  when enabled:
+    for i in h.indicesWithChildren:
+      # note: we only know that i has a left child
+      # the right child is optional and requires a check
+      let j = childLInd(i)
+      let k = childRInd(i)
+      #echo i, j, k
+      if not h.propFulfilled(i, j):
+        raise newException(AssertionError, format(
+          "Propertiy not fulfilled for $#, $# values $#, $#",
+          i, j, h.data[i], h.data[j]
+        ))
+      if h.hasChildAt(k) and not h.propFulfilled(i, k):
+        raise newException(AssertionError, format(
+          "Propertiy not fulfilled for $#, $# values $#, $#",
+          i, k, h.data[i], h.data[k]
+        ))
+
 
 proc swap[T](h: var Heap[T], i, j: int) {.inline.} =
   ## swaps two nodes in the heap.
@@ -69,7 +90,7 @@ proc siftdown[T](h: var Heap[T], i: int) =
   # Note: Most often we have both children, since siftdown is commonly called
   # for the root (after swapping it for removal). Therefore, we check for this
   # first:
-  if h.hasChildAt(j) and h.hasChildAt(k): 
+  if h.hasChildAt(j) and h.hasChildAt(k):
     # any child violated the heap property?
     if not h.propFulfilled(i,j) or not h.propFulfilled(i,k):
       # is j a valid parent of k => swap i with j
@@ -121,7 +142,7 @@ proc push*[T](h: var Heap[T], x: T) =
   h.data.add(x)
   h.siftup(h.size)
   h.size.inc
-  when defined(debugHeaps): assert h.checkHeapProperty
+  h.assertHeapProperty(defined(debugHeaps))
 
 proc pop*[T](h: var Heap[T]): T =
   ## pop (dequeue) the min/max element of the heap
@@ -136,14 +157,14 @@ proc pop*[T](h: var Heap[T]): T =
   h.data.setlen(h.size)
   # restore heap property
   h.siftdown(0)
-  when defined(debugHeaps): assert h.checkHeapProperty
+  h.assertHeapProperty(defined(debugHeaps))
 
 
 proc pushPop*[T](h: var Heap[T], x: T): (bool, T) =
   ## Optimized version of performing a push + pop.
   ##
   ## Technical note:
-  ## If the new inserted element ``x`` is a proper parent 
+  ## If the new inserted element ``x`` is a proper parent
   ## of the current root, a manual push + pop would lead to:
   ##   (1) push ``x`` would "siftup" ``x``
   ##       making it the new root.
@@ -199,22 +220,6 @@ iterator sortedItems*[T](h: Heap[T]): T =
 
 
 
-proc checkHeapProperty[T](h: Heap[T]): bool =
-  ## only for debugging: explicit check if the heap property
-  ## is fulfilled for all nodes
-  for i in h.indicesWithChildren:
-    # note: we only know that i has a left child
-    # the right child is optional and requires a check
-    let j = childLInd(i)
-    let k = childRInd(i)
-    #echo i, j, k
-    if not h.propFulfilled(i, j):
-      echo "propertiy not fulfilled for ",i , ", ", j, " values ", h.data[i], ", ", h.data[j]
-      return false
-    if h.hasChildAt(k) and not h.propFulfilled(i, k):
-      echo "propertiy not fulfilled for ",i , ", ", k, " values ", h.data[i], ", ", h.data[k]
-      return false
-  return true
 
 
 
@@ -223,7 +228,7 @@ when isMainModule:
   import math
   import algorithm
   import sequtils
-  
+
   proc randomData[T](N: int, maxVal: T): seq[T] =
     result = newSeq[T](N)
     for i in 0 ..< N:
@@ -254,22 +259,22 @@ when isMainModule:
           var h = newHeap[int](system.cmp)
           for i in 1..N:
             h.push(random(100))
-            check h.checkHeapProperty
+            h.assertHeapProperty
           for i in 1..N:
             let x = h.pop
-            check h.checkHeapProperty
-          check h.checkHeapProperty
+            h.assertHeapProperty
+          h.assertHeapProperty
 
     test "heapify":
       for iter in iterations:
         for N in [10, 100]:
           let data = randomData(N, 100)
           let h = newHeapFromArray[int](data) # removing [T] causes internal error! report?
-          check h.checkHeapProperty
+          h.assertHeapProperty
           let sorted1 = data.sorted(system.cmp)
           let sorted2 = toSeq(h.sortedItems)
           check sorted1 == sorted2
-              
+
     test "pushPop":
       for iter in iterations:
         randomize(iter)
@@ -278,11 +283,11 @@ when isMainModule:
           var h2 = newHeap[int](system.cmp)
           # prefill both
           for i in 1..N:
-            let x = random(100) 
+            let x = random(100)
             h1.push(x)
             h2.push(x)
           for i in 1..1000:
-            let x = random(100) 
+            let x = random(100)
             h1.push(x)
             let y1 = h1.pop
             let (_, y2) = h2.pushPop(x)
@@ -299,11 +304,11 @@ when isMainModule:
           var h2 = newHeap[int](system.cmp)
           # prefill both
           for i in 1..N:
-            let x = random(100) 
+            let x = random(100)
             h1.push(x)
             h2.push(x)
           for i in 1..1000:
-            let x = random(100) 
+            let x = random(100)
             let y1 = h1.pop
             h1.push(x)
             let y2 = h2.popPush(x)
