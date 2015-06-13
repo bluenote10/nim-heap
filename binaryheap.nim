@@ -261,7 +261,7 @@ when isMainModule:
             h.push(random(100))
             h.assertHeapProperty
           for i in 1..N:
-            let x = h.pop
+            discard h.pop
             h.assertHeapProperty
           h.assertHeapProperty
 
