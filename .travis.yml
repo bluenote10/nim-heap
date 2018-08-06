@@ -7,8 +7,9 @@ install:
     - git clone --depth 1 https://github.com/nim-lang/csources.git
     - cd csources
     - sh build.sh
-    - cd ../
+    - cd ..
     - bin/nim c koch
     - ./koch boot -d:release
+    - cd ..
     - export PATH=`pwd`/Nim/bin:$PATH
 script: make
