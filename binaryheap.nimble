@@ -1,6 +1,6 @@
 [Package]
 name          = "binaryheap"
-version       = "0.1.0"
+version       = "0.1.1"
 author        = "Fabian Keller"
 description   = "Simple binary heap implementation"
 license       = "MIT"
