@@ -45,7 +45,7 @@ proc propFulfilled[T](h: Heap[T], indParent, indChild: int): bool {.inline.} =
   h.comp(h.data[indParent], h.data[indChild]) <= 0
 
 
-template assertHeapProperty[T](h: Heap[T], enabled: expr = true) =
+template assertHeapProperty[T](h: Heap[T], enabled = true) =
   ## only for debugging: explicit check if the heap property
   ## is fulfilled for all nodes
   when enabled:
@@ -226,13 +226,14 @@ iterator sortedItems*[T](h: Heap[T]): T =
 when isMainModule:
   import unittest
   import math
+  import random
   import algorithm
   import sequtils
 
   proc randomData[T](N: int, maxVal: T): seq[T] =
     result = newSeq[T](N)
     for i in 0 ..< N:
-      result[i] = random(maxVal)
+      result[i] = rand(maxVal-1)
 
   const iterations = 1 .. 100
 
@@ -258,7 +259,7 @@ when isMainModule:
         for N in [1, 10, 100]:
           var h = newHeap[int](system.cmp)
           for i in 1..N:
-            h.push(random(100))
+            h.push(rand(99))
             h.assertHeapProperty
           for i in 1..N:
             discard h.pop
@@ -283,11 +284,11 @@ when isMainModule:
           var h2 = newHeap[int](system.cmp)
           # prefill both
           for i in 1..N:
-            let x = random(100)
+            let x = rand(99)
             h1.push(x)
             h2.push(x)
           for i in 1..1000:
-            let x = random(100)
+            let x = rand(99)
             h1.push(x)
             let y1 = h1.pop
             let (_, y2) = h2.pushPop(x)
@@ -304,11 +305,11 @@ when isMainModule:
           var h2 = newHeap[int](system.cmp)
           # prefill both
           for i in 1..N:
-            let x = random(100)
+            let x = rand(99)
             h1.push(x)
             h2.push(x)
           for i in 1..1000:
-            let x = random(100)
+            let x = rand(99)
             let y1 = h1.pop
             h1.push(x)
             let y2 = h2.popPush(x)
@@ -316,7 +317,3 @@ when isMainModule:
           let sorted1 = toSeq(h1.sortedItems)
           let sorted2 = toSeq(h2.sortedItems)
           check sorted1 == sorted2
-
-
-
-
