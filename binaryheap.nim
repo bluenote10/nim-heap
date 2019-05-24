@@ -13,7 +13,7 @@ type
   Heap*[T] = object
     data: seq[T]
     size: int
-    comp: proc (x: T, y: T): int # CompareProc[T], why int not byte?
+    comp: proc (x: T, y: T): int {.gcsafe.} # CompareProc[T], why int not byte?
 
   EmptyHeapError* = object of Exception
 
