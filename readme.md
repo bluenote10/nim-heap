@@ -1,4 +1,4 @@
-Nim-Heap [![Build Status](https://travis-ci.org/bluenote10/nim-heap.svg?branch=master)](https://travis-ci.org/bluenote10/nim-heap)
+Nim-Heap [![Build Status](https://github.com/bluenote10/nim-heap/workflows/ci/badge.svg)](https://github.com/bluenote10/nim-heap/actions?query=workflow%3Aci)
 ========
 
 This is a simple binary heap implementation, using a dynamic array (`seq`) as
